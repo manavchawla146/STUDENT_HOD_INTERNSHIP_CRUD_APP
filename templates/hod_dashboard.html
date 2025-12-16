@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HOD Dashboard</title>
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+}
+
+.card {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+header {
+    background: #4a6fa5;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #4a6fa5;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+section {
+    padding: 20px;
+}
+
+textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #f8f9fa;
+}
+
+.progress-container {
+    width: 100%;
+    height: 18px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #4a6fa5;
+    color: white;
+    font-size: 11px;
+    text-align: center;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 6px;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Modal -->
+<div id="successModal" class="modal">
+  <div class="modal-content">
+    <i class="fa fa-check-circle" style="font-size:40px;color:green"></i>
+    <h3>Message Sent</h3>
+    <button onclick="closeModal()" class="btn btn-primary">OK</button>
+  </div>
+</div>
+
+<div class="card">
+
+<header>
+<h2>HOD Dashboard</h2>
+<a href="/logout" class="btn btn-danger">Logout</a>
+</header>
+
+<section>
+<h3>Send Message to All Students</h3>
+<form id="messageForm">
+<textarea name="message" required></textarea>
+<button class="btn btn-primary">Send</button>
+</form>
+</section>
+
+<section>
+<h3>Student Information</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Roll</th>
+<th>Phone</th>
+<th>Sem</th>
+<th>Mentor</th>
+<th>Company</th>
+<th>Guide</th>
+<th>Project</th>
+<th>Topic</th>
+<th>Progress</th>
+</tr>
+</thead>
+
+<tbody>
+{% for s in students %}
+<tr>
+<td>{{ s.name or "N/A" }}</td>
+<td>{{ s.roll or "N/A" }}</td>
+<td>{{ s.phone or "N/A" }}</td>
+<td>{{ s.semester or "N/A" }}</td>
+<td>{{ s.mentor or "N/A" }}</td>
+<td>{{ s.company or "N/A" }}</td>
+<td>{{ s.company_guide or "N/A" }}</td>
+<td>{{ s.project_name or "N/A" }}</td>
+<td>{{ s.current_topic or "N/A" }}</td>
+<td>
+{% set p = s.project_progress|int if s.project_progress else 0 %}
+<div class="progress-container">
+<div class="progress-bar" style="width: {{ p ~ '%' }};">
+
+    {{ p }}%
+</div>
+
+</div>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</section>
+
+</div>
+
+<script>
+function closeModal() {
+    document.getElementById("successModal").style.display = "none";
+}
+
+document.getElementById("messageForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    fetch("/hod", {
+        method: "POST",
+        body: new FormData(this),
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(res => res.json())
+    .then(() => {
+        this.reset();
+        document.getElementById("successModal").style.display = "flex";
+    });
+});
+</script>
+
+</body>
+</html>
